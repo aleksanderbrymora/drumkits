@@ -35,46 +35,136 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-var axios_1 = __importDefault(require("axios"));
-var puppeteer_1 = __importDefault(require("puppeteer"));
-(function () { return __awaiter(void 0, void 0, void 0, function () {
-    var posts, links, browser;
+var axios_1 = require("axios");
+var puppeteer_1 = require("puppeteer");
+var fs = require("fs");
+var path_1 = require("path");
+var main = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var links;
     return __generator(this, function (_a) {
         switch (_a.label) {
-            case 0: return [4 /*yield*/, axios_1.default.get('https://www.reddit.com/r/drumkits.json')];
+            case 0: return [4 /*yield*/, cleanUpScreenshoots()];
+            case 1:
+                _a.sent();
+                return [4 /*yield*/, getAllLinks()];
+            case 2:
+                links = _a.sent();
+                return [4 /*yield*/, goToSites(links)];
+            case 3:
+                _a.sent();
+                return [2 /*return*/];
+        }
+    });
+}); };
+var pages = [
+    {
+        downloadButton: '[aria-label="Download"]',
+        website: 'google',
+    },
+    {
+        downloadButton: '[aria-label="Download file"]',
+        website: 'mediafire',
+    },
+    {
+        downloadButton: 'a.dl-browser',
+        website: 'mega.nz',
+    },
+];
+var goToSites = function (links) { return __awaiter(void 0, void 0, void 0, function () {
+    var browser, i, link, _i, links_1, page, pageType, error_1;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, puppeteer_1.launch()];
+            case 1:
+                browser = _a.sent();
+                i = 0;
+                _i = 0, links_1 = links;
+                _a.label = 2;
+            case 2:
+                if (!(_i < links_1.length)) return [3 /*break*/, 12];
+                link = links_1[_i];
+                console.log('Now looking at:', link, '\n=================');
+                return [4 /*yield*/, browser.newPage()];
+            case 3:
+                page = _a.sent();
+                return [4 /*yield*/, page.emulate(puppeteer_1.devices['iPhone 6'])];
+            case 4:
+                _a.sent();
+                _a.label = 5;
+            case 5:
+                _a.trys.push([5, 10, , 11]);
+                return [4 /*yield*/, page.goto(link)];
+            case 6:
+                _a.sent();
+                pageType = pages.find(function (p) {
+                    return link.includes(p.website);
+                });
+                if (!pageType) return [3 /*break*/, 9];
+                return [4 /*yield*/, page.waitForSelector(pageType.downloadButton)];
+            case 7:
+                _a.sent();
+                return [4 /*yield*/, page.screenshot({
+                        path: "dist/screenshots/" + i + ".png",
+                        fullPage: true,
+                    })];
+            case 8:
+                _a.sent();
+                i++;
+                _a.label = 9;
+            case 9: return [3 /*break*/, 11];
+            case 10:
+                error_1 = _a.sent();
+                console.error(error_1);
+                return [3 /*break*/, 11];
+            case 11:
+                _i++;
+                return [3 /*break*/, 2];
+            case 12: return [4 /*yield*/, browser.close()];
+            case 13:
+                _a.sent();
+                return [2 /*return*/];
+        }
+    });
+}); };
+var getAllLinks = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var posts, links, err_1;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, axios_1.default.get('https://www.reddit.com/r/drumkits.json')];
             case 1:
                 posts = _a.sent();
                 links = posts.data.data.children
                     .slice(2)
                     .map(function (p) { return p.data.url; });
-                return [4 /*yield*/, puppeteer_1.default.launch()];
+                console.log(links);
+                return [2 /*return*/, links];
             case 2:
-                browser = _a.sent();
-                links.forEach(function (l) { return __awaiter(void 0, void 0, void 0, function () {
-                    var page;
-                    return __generator(this, function (_a) {
-                        switch (_a.label) {
-                            case 0:
-                                console.log(l);
-                                return [4 /*yield*/, browser.newPage()];
-                            case 1:
-                                page = _a.sent();
-                                return [4 /*yield*/, page.goto(l)];
-                            case 2:
-                                _a.sent();
-                                return [4 /*yield*/, page.screenshot({ path: 'screenshots/example.png' })];
-                            case 3:
-                                _a.sent();
-                                return [2 /*return*/];
-                        }
-                    });
-                }); });
-                return [2 /*return*/];
+                err_1 = _a.sent();
+                throw new Error(err_1);
+            case 3: return [2 /*return*/];
         }
     });
-}); })();
+}); };
+var cleanUpScreenshoots = function () { return __awaiter(void 0, void 0, void 0, function () {
+    var directory;
+    return __generator(this, function (_a) {
+        directory = 'dist/screenshots';
+        fs.readdir(directory, function (err, files) {
+            if (err)
+                throw err;
+            for (var _i = 0, files_1 = files; _i < files_1.length; _i++) {
+                var file = files_1[_i];
+                fs.unlink(path_1.join(directory, file), function (err) {
+                    if (err)
+                        throw err;
+                });
+            }
+        });
+        return [2 /*return*/];
+    });
+}); };
+main();
 //# sourceMappingURL=index.js.map
