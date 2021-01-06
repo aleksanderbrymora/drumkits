@@ -19,7 +19,7 @@
 	"homepage": "https://github.com/aleksanderbrymora/drumkits#readme",
 	"dependencies": {
 		"@types/puppeteer": "^3.0.1",
-		"axios": "^0.19.2",
+		"axios": "^0.21.1",
 		"puppeteer": "^5.2.1"
 	}
 }
